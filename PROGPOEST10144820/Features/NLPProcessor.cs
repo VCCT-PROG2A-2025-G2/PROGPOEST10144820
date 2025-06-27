@@ -27,6 +27,7 @@ namespace ST10144820_PROG_POE
         public string TaskDescription { get; set; }
         public string ReminderTime { get; set; }
         public Dictionary<string, object> Parameters { get; set; }
+        public object IntentType { get; internal set; }
 
         public NLPIntent()
         {

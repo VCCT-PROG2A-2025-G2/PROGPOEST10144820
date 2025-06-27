@@ -5,10 +5,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using PROGPOE.Models;
-using PROGPOEST10144820.Features;
-using PROGPOEST10144820.QuizEngene;
-using PROGPOEST10144820.TaskEngen;
-using PROGPOEST10144820.Features; // Add this for your feature classes
 
 namespace PROGPOE
 {
@@ -17,37 +13,10 @@ namespace PROGPOE
         private CyberBotEngine cyberBot;
         private bool isSetupComplete = false;
 
-        // Part 3 Features
-        private QuizEngen quizEngine;
-        private TaskEngen taskEngine;
-        private ActivityLogger activityLogger;
-        private NLPProcessor nlpProcessor;
-
         public MainWindow()
         {
             InitializeComponent();
             InitializeCyberBot();
-            InitializePart3Features();
-        }
-
-        private void InitializePart3Features()
-        {
-            try
-            {
-                // Initialize Part 3 components
-                quizEngine = new QuizEngen();
-                taskEngine = new TaskEngen();
-                activityLogger = new ActivityLogger();
-                nlpProcessor = new NLPProcessor();
-
-                // Log initialization
-                activityLogger.LogActivity("System initialized with all features");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error initializing Part 3 features: {ex.Message}", "Initialization Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         private async void InitializeCyberBot()
@@ -176,10 +145,6 @@ namespace PROGPOE
                 isSetupComplete = true;
 
                 StatusTextBlock.Text = $"Chatting with {UserNameTextBox.Text} - AI Assistant Ready";
-
-                // Log setup completion
-                activityLogger.LogActivity($"User setup completed: {UserNameTextBox.Text}");
-
                 ChatInputTextBox.Focus();
             }
             catch (Exception ex)
@@ -207,7 +172,7 @@ namespace PROGPOE
 
         private async Task SendMessage()
         {
-            if (!isSetupComplete) return;
+            if (!isSetupComplete || cyberBot == null) return;
 
             string message = ChatInputTextBox.Text.Trim();
             if (string.IsNullOrEmpty(message)) return;
@@ -222,16 +187,13 @@ namespace PROGPOE
                 // Clear input
                 ChatInputTextBox.Text = string.Empty;
 
-                // Process with NLP first
-                var intent = nlpProcessor.ProcessUserInput(message);
-
-                // Handle different intents based on NLP processing
-                await HandleUserIntent(message, intent);
+                // Process the message
+                await cyberBot.ProcessUserInputAsync(message);
 
                 // Handle exit command
                 if (message.ToLower() == "exit")
                 {
-                    await Task.Delay(2000);
+                    await Task.Delay(2000); // Give time to read goodbye message
                     Application.Current.Shutdown();
                 }
             }
@@ -250,115 +212,9 @@ namespace PROGPOE
             }
         }
 
-        private async Task HandleUserIntent(string originalMessage, string intent)
-        {
-            string response = "";
-
-            switch (intent.ToLower())
-            {
-                case "start_quiz":
-                case "quiz":
-                    response = "🎯 Starting Cybersecurity Quiz!\n\n" + quizEngine.StartQuiz();
-                    activityLogger.LogActivity("Quiz started");
-                    break;
-
-                case "add_task":
-                case "task":
-                    response = await HandleTaskCreation(originalMessage);
-                    break;
-
-                case "view_tasks":
-                    response = "📋 Your Current Tasks:\n\n" + taskEngine.GetAllTasks();
-                    activityLogger.LogActivity("Viewed task list");
-                    break;
-
-                case "activity_log":
-                case "log":
-                    response = "📊 Recent Activity:\n\n" + activityLogger.GetRecentActivity();
-                    break;
-
-                case "help":
-                    response = GetHelpMessage();
-                    break;
-
-                default:
-                    // Process with original cyberBot if no specific intent matched
-                    if (cyberBot != null)
-                    {
-                        await cyberBot.ProcessUserInputAsync(originalMessage);
-                        return;
-                    }
-                    else
-                    {
-                        response = "I'm here to help with cybersecurity tasks, quizzes, and reminders. Try 'help' for more options!";
-                    }
-                    break;
-            }
-
-            // Add the response to chat
-            AddChatMessage(response, isUser: false);
-        }
-
-        private async Task<string> HandleTaskCreation(string message)
-        {
-            try
-            {
-                // Extract task details from message using NLP
-                var taskDetails = nlpProcessor.ExtractTaskDetails(message);
-
-                if (string.IsNullOrEmpty(taskDetails.Title))
-                {
-                    return "❌ Please specify what task you'd like to add. For example: 'Add task to enable two-factor authentication'";
-                }
-
-                var task = taskEngine.AddTask(taskDetails.Title, taskDetails.Description, taskDetails.ReminderDate);
-                activityLogger.LogActivity($"Task added: {taskDetails.Title}");
-
-                string response = $"✅ Task added successfully!\n\n📝 Title: {task.Title}\n📄 Description: {task.Description}";
-
-                if (task.ReminderDate.HasValue)
-                {
-                    response += $"\n⏰ Reminder: {task.ReminderDate:yyyy-MM-dd HH:mm}";
-                }
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                return $"❌ Error adding task: {ex.Message}";
-            }
-        }
-
-        private string GetHelpMessage()
-        {
-            return @"🤖 CyberBot Commands Help:
-
-📝 TASK MANAGEMENT:
-• 'add task [description]' - Add a new cybersecurity task
-• 'view tasks' - See all your tasks
-• 'remind me to [task]' - Add task with reminder
-
-🎯 QUIZ FEATURES:
-• 'start quiz' - Begin cybersecurity quiz
-• 'quiz' - Start a quick quiz session
-
-📊 ACTIVITY & LOGS:
-• 'activity log' - View recent actions
-• 'what have you done' - Show activity summary
-
-💡 GENERAL:
-• 'help' - Show this help menu
-• 'tips' - Get cybersecurity tips
-• 'stats' - View your progress
-
-Type naturally! I understand variations like:
-'Can you remind me to update my password tomorrow?'
-'Set a task for enabling 2FA'";
-        }
-
         private async void QuickActionButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!isSetupComplete) return;
+            if (!isSetupComplete || cyberBot == null) return;
 
             var button = sender as Button;
             string command = "help";
@@ -379,19 +235,10 @@ Type naturally! I understand variations like:
                     case "MemoryButton":
                         command = "memory";
                         break;
-                    case "QuizButton":
-                        command = "start quiz";
-                        break;
-                    case "TasksButton":
-                        command = "view tasks";
-                        break;
-                    case "ActivityButton":
-                        command = "activity log";
-                        break;
                 }
             }
 
-            await HandleUserIntent(command, command);
+            await cyberBot.ProcessUserInputAsync(command);
         }
 
         private async void VoiceToggleButton_Click(object sender, RoutedEventArgs e)
@@ -426,7 +273,7 @@ Type naturally! I understand variations like:
 
                 var welcomeText = new TextBlock
                 {
-                    Text = "🤖 Chat cleared! I'm ready to help you with cybersecurity questions, tasks, and quizzes.",
+                    Text = "🤖 Chat cleared! I'm ready to help you with cybersecurity questions.",
                     Foreground = Brushes.White,
                     TextWrapping = TextWrapping.Wrap,
                     FontSize = 14
@@ -434,8 +281,6 @@ Type naturally! I understand variations like:
 
                 welcomeBorder.Child = welcomeText;
                 ChatMessagesPanel.Children.Add(welcomeBorder);
-
-                activityLogger.LogActivity("Chat history cleared");
             }
         }
 
