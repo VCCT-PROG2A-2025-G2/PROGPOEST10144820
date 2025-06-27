@@ -27,7 +27,16 @@ namespace PROGPOE
                 InitializeComponent();
                 Console.WriteLine("InitializeComponent completed");
 
-                activityLogger = logger ?? throw new ArgumentNullException(nameof(logger));
+                // More robust null checking
+                if (logger == null)
+                {
+                    Console.WriteLine("ERROR: ActivityLogger parameter is null!");
+                    MessageBox.Show("Cannot create Activity Window: ActivityLogger is required.",
+                                   "Initialization Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw new ArgumentNullException(nameof(logger), "ActivityLogger cannot be null");
+                }
+
+                activityLogger = logger;
                 Console.WriteLine("ActivityLogger assigned");
 
                 displayedActivities = new ObservableCollection<ActivityLogEntry>();
@@ -59,8 +68,8 @@ namespace PROGPOE
                 // Update last updated time
                 LastUpdatedTextBlock.Text = DateTime.Now.ToString("HH:mm:ss");
 
-                // Log the window opening
-                activityLogger.LogActivity("Activity Log Opened", "User accessed the activity log viewer");
+                // Log the window opening - with null check
+                SafeLogActivity("Activity Log Opened", "User accessed the activity log viewer");
 
                 // Set up value converter for boolean to visibility (if not available in XAML)
                 // This ensures the ShowDate property works correctly
@@ -78,6 +87,15 @@ namespace PROGPOE
         {
             try
             {
+                // Check if activityLogger is available
+                if (activityLogger == null)
+                {
+                    Console.WriteLine("Cannot load activities - ActivityLogger is null");
+                    ShowEmptyState();
+                    ActivitySummaryTextBlock.Text = "Activity logger not available";
+                    return;
+                }
+
                 // Get all activities from the logger
                 allActivities = activityLogger.GetAllActivities().ToList();
 
@@ -100,6 +118,8 @@ namespace PROGPOE
 
         private void ProcessActivitiesForDisplay()
         {
+            if (allActivities == null) return;
+
             DateTime? lastDate = null;
 
             foreach (var activity in allActivities.OrderByDescending(a => a.Timestamp))
@@ -116,6 +136,13 @@ namespace PROGPOE
         {
             try
             {
+                if (allActivities == null)
+                {
+                    displayedActivities.Clear();
+                    ShowEmptyState();
+                    return;
+                }
+
                 // Start with all activities  
                 var filteredActivities = allActivities.AsEnumerable();
 
@@ -164,20 +191,27 @@ namespace PROGPOE
 
         private void ShowEmptyState()
         {
-            ActivityListBox.Visibility = Visibility.Collapsed;
-            EmptyStatePanel.Visibility = Visibility.Visible;
+            if (ActivityListBox != null) ActivityListBox.Visibility = Visibility.Collapsed;
+            if (EmptyStatePanel != null) EmptyStatePanel.Visibility = Visibility.Visible;
         }
 
         private void HideEmptyState()
         {
-            ActivityListBox.Visibility = Visibility.Visible;
-            EmptyStatePanel.Visibility = Visibility.Collapsed;
+            if (ActivityListBox != null) ActivityListBox.Visibility = Visibility.Visible;
+            if (EmptyStatePanel != null) EmptyStatePanel.Visibility = Visibility.Collapsed;
         }
 
         private void UpdateActivitySummary()
         {
             try
             {
+                if (allActivities == null || ActivitySummaryTextBlock == null)
+                {
+                    if (ActivitySummaryTextBlock != null)
+                        ActivitySummaryTextBlock.Text = "Unable to load activity summary";
+                    return;
+                }
+
                 int totalActivities = allActivities.Count;
                 int todayActivities = allActivities.Count(a => a.Timestamp.Date == DateTime.Today);
 
@@ -185,7 +219,8 @@ namespace PROGPOE
             }
             catch (Exception ex)
             {
-                ActivitySummaryTextBlock.Text = "Unable to load activity summary";
+                if (ActivitySummaryTextBlock != null)
+                    ActivitySummaryTextBlock.Text = "Unable to load activity summary";
             }
         }
 
@@ -193,6 +228,14 @@ namespace PROGPOE
         {
             try
             {
+                if (ActivityStatsTextBlock == null) return;
+
+                if (allActivities == null || displayedActivities == null)
+                {
+                    ActivityStatsTextBlock.Text = "Statistics unavailable";
+                    return;
+                }
+
                 int totalActivities = allActivities.Count;
                 int displayedCount = displayedActivities.Count;
 
@@ -200,26 +243,60 @@ namespace PROGPOE
             }
             catch (Exception ex)
             {
-                ActivityStatsTextBlock.Text = "Statistics unavailable";
+                if (ActivityStatsTextBlock != null)
+                    ActivityStatsTextBlock.Text = "Statistics unavailable";
             }
         }
 
-        // Event Handlers
+        // Helper method for safe logging
+        private void SafeLogActivity(string action, string description)
+        {
+            try
+            {
+                if (activityLogger != null)
+                {
+                    activityLogger.LogActivity(action, description);
+                }
+                else
+                {
+                    Console.WriteLine($"Cannot log activity - ActivityLogger is null. Action: {action}, Description: {description}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error logging activity: {ex.Message}");
+            }
+        }
+
+        // Event Handlers - Fixed with null checks
         private void ActivityFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ActivityFilterComboBox.SelectedItem is ComboBoxItem selectedItem)
+            // Add null check to prevent NullReferenceException
+            if (activityLogger == null)
+            {
+                Console.WriteLine("ActivityLogger is null in ActivityFilterComboBox_SelectionChanged");
+                return;
+            }
+
+            if (ActivityFilterComboBox?.SelectedItem is ComboBoxItem selectedItem)
             {
                 currentFilter = selectedItem.Tag?.ToString() ?? "All";
                 ApplyFiltersAndUpdate();
 
-                activityLogger.LogActivity("Activity Filter Changed",
-                    $"Filter set to: {currentFilter}");
+                SafeLogActivity("Activity Filter Changed", $"Filter set to: {currentFilter}");
             }
         }
 
         private void ActivityLimitComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ActivityLimitComboBox.SelectedItem is ComboBoxItem selectedItem)
+            // Add null check to prevent NullReferenceException
+            if (activityLogger == null)
+            {
+                Console.WriteLine("ActivityLogger is null in ActivityLimitComboBox_SelectionChanged");
+                return;
+            }
+
+            if (ActivityLimitComboBox?.SelectedItem is ComboBoxItem selectedItem)
             {
                 if (int.TryParse(selectedItem.Tag?.ToString(), out int limit))
                 {
@@ -227,8 +304,7 @@ namespace PROGPOE
                     ApplyFiltersAndUpdate();
 
                     string limitText = limit == 0 ? "All" : limit.ToString();
-                    activityLogger.LogActivity("Activity Limit Changed",
-                        $"Display limit set to: {limitText} activities");
+                    SafeLogActivity("Activity Limit Changed", $"Display limit set to: {limitText} activities");
                 }
             }
         }
@@ -238,12 +314,13 @@ namespace PROGPOE
             try
             {
                 LoadActivities();
-                LastUpdatedTextBlock.Text = DateTime.Now.ToString("HH:mm:ss");
+                if (LastUpdatedTextBlock != null)
+                    LastUpdatedTextBlock.Text = DateTime.Now.ToString("HH:mm:ss");
 
                 MessageBox.Show("Activity log refreshed successfully!", "Refresh Complete",
                               MessageBoxButton.OK, MessageBoxImage.Information);
 
-                activityLogger.LogActivity("Activity Log Refreshed", "User manually refreshed the activity log");
+                SafeLogActivity("Activity Log Refreshed", "User manually refreshed the activity log");
             }
             catch (Exception ex)
             {
@@ -254,6 +331,13 @@ namespace PROGPOE
 
         private void ClearLogButton_Click(object sender, RoutedEventArgs e)
         {
+            if (activityLogger == null)
+            {
+                MessageBox.Show("Activity logger is not available.", "Error",
+                               MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             var result = MessageBox.Show(
                 "Are you sure you want to clear all activity logs? This action cannot be undone.",
                 "Confirm Clear Log",
@@ -264,7 +348,7 @@ namespace PROGPOE
             {
                 try
                 {
-                    int clearedCount = allActivities.Count;
+                    int clearedCount = allActivities?.Count ?? 0;
                     activityLogger.ClearLog();
 
                     // Reload to reflect changes
@@ -273,8 +357,7 @@ namespace PROGPOE
                     MessageBox.Show($"Successfully cleared {clearedCount} activity entries.", "Log Cleared",
                                   MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    activityLogger.LogActivity("Activity Log Cleared",
-                        $"User cleared {clearedCount} activity entries");
+                    SafeLogActivity("Activity Log Cleared", $"User cleared {clearedCount} activity entries");
                 }
                 catch (Exception ex)
                 {
@@ -286,6 +369,20 @@ namespace PROGPOE
 
         private void ExportLogButton_Click(object sender, RoutedEventArgs e)
         {
+            if (activityLogger == null)
+            {
+                MessageBox.Show("Activity logger is not available.", "Error",
+                               MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (allActivities == null || allActivities.Count == 0)
+            {
+                MessageBox.Show("No activities to export.", "Export Error",
+                               MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
             try
             {
                 SaveFileDialog saveFileDialog = new SaveFileDialog
@@ -303,7 +400,7 @@ namespace PROGPOE
                     MessageBox.Show($"Activity log exported successfully to:\n{saveFileDialog.FileName}",
                                   "Export Complete", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    activityLogger.LogActivity("Activity Log Exported",
+                    SafeLogActivity("Activity Log Exported",
                         $"User exported activity log to: {Path.GetFileName(saveFileDialog.FileName)}");
                 }
             }
@@ -316,6 +413,8 @@ namespace PROGPOE
 
         private void ExportActivitiesToFile(string filePath)
         {
+            if (allActivities == null) return;
+
             string extension = Path.GetExtension(filePath).ToLower();
 
             using (StreamWriter writer = new StreamWriter(filePath))
@@ -333,7 +432,8 @@ namespace PROGPOE
                     writer.WriteLine("Timestamp,Action,Description");
                     foreach (var activity in allActivities.OrderByDescending(a => a.Timestamp))
                     {
-                        writer.WriteLine($"\"{activity.Timestamp:yyyy-MM-dd HH:mm:ss}\",\"{activity.Action}\",\"{activity.Description}\"");
+                        string description = activity.Description?.ToString() ?? "";
+                        writer.WriteLine($"\"{activity.Timestamp:yyyy-MM-dd HH:mm:ss}\",\"{activity.Action}\",\"{description}\"");
                     }
                 }
                 else
@@ -342,7 +442,7 @@ namespace PROGPOE
                     foreach (var activity in allActivities.OrderByDescending(a => a.Timestamp))
                     {
                         writer.WriteLine($"[{activity.Timestamp:yyyy-MM-dd HH:mm:ss}] {activity.Action}");
-                        if (!string.IsNullOrWhiteSpace((string)activity.Description))
+                        if (!string.IsNullOrWhiteSpace(activity.Description?.ToString()))
                         {
                             writer.WriteLine($"  Description: {activity.Description}");
                         }
@@ -356,17 +456,24 @@ namespace PROGPOE
         {
             // You can add functionality here to show more details about selected activity
             // For example, in a details panel or popup
+
+            // Optional: Log the selection for analytics
+            if (ActivityListBox?.SelectedItem is ActivityLogEntry selectedActivity)
+            {
+                SafeLogActivity("Activity Selected", $"User selected activity: {selectedActivity.Action}");
+            }
         }
 
         private void BackToChatButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                activityLogger.LogActivity("Activity Log Closed", "User returned to main chat interface");
+                SafeLogActivity("Activity Log Closed", "User returned to main chat interface");
                 this.Close();
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error during window close: {ex.Message}");
                 // Still close the window even if logging fails
                 this.Close();
             }
@@ -377,11 +484,16 @@ namespace PROGPOE
         {
             try
             {
-                activityLogger.LogActivity("Activity Log Session Ended",
-                    $"Activity log session completed. Total activities viewed: {allActivities.Count}");
+                // Safe logging with null check
+                if (activityLogger != null && allActivities != null)
+                {
+                    SafeLogActivity("Activity Log Session Ended",
+                        $"Activity log session completed. Total activities viewed: {allActivities.Count}");
+                }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error logging window close: {ex.Message}");
                 // Ignore logging errors when closing
             }
 
@@ -391,8 +503,10 @@ namespace PROGPOE
         // Helper method to get activity category for better filtering
         private string GetActivityCategory(ActivityLogEntry activity)
         {
-            string action = activity.Action.ToLower();
-            string description = activity.Description?.ToString().ToLower() ?? string.Empty;
+            if (activity == null) return "Unknown";
+
+            string action = activity.Action?.ToLower() ?? "";
+            string description = activity.Description?.ToString().ToLower() ?? "";
 
             if (action.Contains("task") || description.Contains("task"))
                 return "Task";
@@ -408,16 +522,37 @@ namespace PROGPOE
         public void RefreshActivityData()
         {
             LoadActivities();
-            LastUpdatedTextBlock.Text = DateTime.Now.ToString("HH:mm:ss");
+            if (LastUpdatedTextBlock != null)
+                LastUpdatedTextBlock.Text = DateTime.Now.ToString("HH:mm:ss");
         }
 
         // Method to focus on recent activities (can be called when new activities are added)
         public void ScrollToTop()
         {
-            if (ActivityListBox.Items.Count > 0)
+            if (ActivityListBox?.Items.Count > 0)
             {
                 ActivityListBox.ScrollIntoView(ActivityListBox.Items[0]);
             }
+        }
+
+        // Additional helper method to check if the window is properly initialized
+        public bool IsProperlyInitialized()
+        {
+            return activityLogger != null &&
+                   displayedActivities != null &&
+                   allActivities != null;
+        }
+
+        // Method to safely get activity count
+        public int GetActivityCount()
+        {
+            return allActivities?.Count ?? 0;
+        }
+
+        // Method to safely get displayed activity count
+        public int GetDisplayedActivityCount()
+        {
+            return displayedActivities?.Count ?? 0;
         }
     }
 
@@ -426,6 +561,7 @@ namespace PROGPOE
     {
         public static bool GetShowDate(ActivityLogEntry entry, DateTime? previousDate)
         {
+            if (entry == null) return false;
             return previousDate == null || entry.Timestamp.Date != previousDate.Value.Date;
         }
     }
