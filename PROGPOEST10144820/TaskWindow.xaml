@@ -1,0 +1,275 @@
+﻿<Window x:Class="PROGPOE.TaskWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Cybersecurity Task Manager" Height="600" Width="800"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2C3E50" CornerRadius="5" Padding="15" Margin="0,0,0,10">
+            <TextBlock Text="Cybersecurity Task Assistant" 
+                      FontSize="24" FontWeight="Bold" 
+                      Foreground="White" HorizontalAlignment="Center"/>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Task List Section -->
+            <Border Grid.Column="0" Background="White" CornerRadius="5" Padding="10" 
+                   BorderBrush="#BDC3C7" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Your Cybersecurity Tasks" 
+                              FontSize="18" FontWeight="Bold" 
+                              Margin="0,0,0,10" Foreground="#2C3E50"/>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ListBox x:Name="TaskListBox" 
+                                BorderThickness="0" 
+                                Background="Transparent"
+                                SelectionChanged="TaskListBox_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#ECF0F1" 
+                                           CornerRadius="5" 
+                                           Padding="10" 
+                                           Margin="0,2,0,2"
+                                           BorderBrush="#BDC3C7" 
+                                           BorderThickness="1">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock Grid.Row="0" 
+                                                      Text="{Binding Title}" 
+                                                      FontWeight="Bold" 
+                                                      FontSize="14"
+                                                      Foreground="#2C3E50"/>
+
+                                            <TextBlock Grid.Row="1" 
+                                                      Text="{Binding Description}" 
+                                                      FontSize="12"
+                                                      Foreground="#34495E"
+                                                      Margin="0,5,0,0"
+                                                      TextWrapping="Wrap"/>
+
+                                            <StackPanel Grid.Row="2" 
+                                                       Orientation="Horizontal" 
+                                                       Margin="0,5,0,0">
+                                                <TextBlock Text="Status: " 
+                                                          FontSize="10" 
+                                                          Foreground="#7F8C8D"/>
+                                                <TextBlock Text="{Binding Status}" 
+                                                          FontSize="10" 
+                                                          FontWeight="Bold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Completed">
+                                                                    <Setter Property="Foreground" Value="#27AE60"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="Pending">
+                                                                    <Setter Property="Foreground" Value="#E74C3C"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+
+                                                <TextBlock Text=" | Reminder: " 
+                                                          FontSize="10" 
+                                                          Foreground="#7F8C8D"
+                                                          Margin="10,0,0,0"/>
+                                                <TextBlock Text="{Binding ReminderDate}" 
+                                                          FontSize="10" 
+                                                          Foreground="#3498DB"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- Add/Manage Task Section -->
+            <Border Grid.Column="2" Background="White" CornerRadius="5" Padding="10" 
+                   BorderBrush="#BDC3C7" BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Add New Task" 
+                                  FontSize="16" FontWeight="Bold" 
+                                  Margin="0,0,0,15" Foreground="#2C3E50"/>
+
+                        <!-- Task Title -->
+                        <TextBlock Text="Task Title:" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <TextBox x:Name="TaskTitleTextBox" 
+                                Height="30" 
+                                Padding="5"
+                                BorderBrush="#BDC3C7"
+                                Margin="0,0,0,10"/>
+
+                        <!-- Task Description -->
+                        <TextBlock Text="Description:" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <TextBox x:Name="TaskDescriptionTextBox" 
+                                Height="60" 
+                                Padding="5"
+                                TextWrapping="Wrap"
+                                AcceptsReturn="True"
+                                VerticalScrollBarVisibility="Auto"
+                                BorderBrush="#BDC3C7"
+                                Margin="0,0,0,10"/>
+
+                        <!-- Reminder Section -->
+                        <TextBlock Text="Set Reminder:" FontWeight="Bold" Margin="0,0,0,5"/>
+                        <CheckBox x:Name="SetReminderCheckBox" 
+                                 Content="Enable Reminder" 
+                                 Margin="0,0,0,10"
+                                 Checked="SetReminderCheckBox_Checked"
+                                 Unchecked="SetReminderCheckBox_Unchecked"/>
+
+                        <StackPanel x:Name="ReminderPanel" Visibility="Collapsed">
+                            <TextBlock Text="Reminder Date:" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <DatePicker x:Name="ReminderDatePicker" 
+                                       Margin="0,0,0,10"
+                                       BorderBrush="#BDC3C7"/>
+
+                            <TextBlock Text="Quick Reminder Options:" FontWeight="Bold" Margin="0,0,0,5"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <Button x:Name="Remind1DayButton" 
+                                       Content="1 Day" 
+                                       Margin="0,0,5,0" 
+                                       Padding="5"
+                                       Click="RemindDayButton_Click" 
+                                       Tag="1"/>
+                                <Button x:Name="Remind3DayButton" 
+                                       Content="3 Days" 
+                                       Margin="0,0,5,0" 
+                                       Padding="5"
+                                       Click="RemindDayButton_Click" 
+                                       Tag="3"/>
+                                <Button x:Name="Remind7DayButton" 
+                                       Content="7 Days" 
+                                       Margin="0,0,0,0" 
+                                       Padding="5"
+                                       Click="RemindDayButton_Click" 
+                                       Tag="7"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Action Buttons -->
+                        <Button x:Name="AddTaskButton" 
+                               Content="Add Task" 
+                               Height="35" 
+                               Background="#3498DB" 
+                               Foreground="White" 
+                               BorderThickness="0"
+                               FontWeight="Bold"
+                               Margin="0,10,0,10"
+                               Click="AddTaskButton_Click"
+                               Cursor="Hand"/>
+
+                        <Separator Margin="0,10,0,10"/>
+
+                        <TextBlock Text="Task Actions:" FontWeight="Bold" Margin="0,0,0,10"/>
+
+                        <Button x:Name="CompleteTaskButton" 
+                               Content="Mark as Completed" 
+                               Height="30" 
+                               Background="#27AE60" 
+                               Foreground="White" 
+                               BorderThickness="0"
+                               Margin="0,0,0,5"
+                               Click="CompleteTaskButton_Click"
+                               IsEnabled="False"
+                               Cursor="Hand"/>
+
+                        <Button x:Name="DeleteTaskButton" 
+                               Content="Delete Task" 
+                               Height="30" 
+                               Background="#E74C3C" 
+                               Foreground="White" 
+                               BorderThickness="0"
+                               Margin="0,0,0,5"
+                               Click="DeleteTaskButton_Click"
+                               IsEnabled="False"
+                               Cursor="Hand"/>
+
+                        <Button x:Name="EditTaskButton" 
+                               Content="Edit Task" 
+                               Height="30" 
+                               Background="#F39C12" 
+                               Foreground="White" 
+                               BorderThickness="0"
+                               Margin="0,0,0,10"
+                               Click="EditTaskButton_Click"
+                               IsEnabled="False"
+                               Cursor="Hand"/>
+
+                        <Separator Margin="0,10,0,10"/>
+
+                        <Button x:Name="ClearFormButton" 
+                               Content="Clear Form" 
+                               Height="30" 
+                               Background="#95A5A6" 
+                               Foreground="White" 
+                               BorderThickness="0"
+                               Click="ClearFormButton_Click"
+                               Cursor="Hand"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#34495E" CornerRadius="5" Padding="10" Margin="0,10,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="BackToChatButton" 
+                       Content="← Back to Chat" 
+                       Background="#2C3E50" 
+                       Foreground="White" 
+                       BorderThickness="0"
+                       Padding="10,5"
+                       Margin="0,0,10,0"
+                       Click="BackToChatButton_Click"
+                       Cursor="Hand"/>
+
+                <TextBlock x:Name="TaskCountLabel" 
+                          Text="Tasks: 0 Total, 0 Completed" 
+                          Foreground="White" 
+                          VerticalAlignment="Center"
+                          Margin="10,0,10,0"/>
+
+                <Button x:Name="RefreshTasksButton" 
+                       Content="🔄 Refresh" 
+                       Background="#3498DB" 
+                       Foreground="White" 
+                       BorderThickness="0"
+                       Padding="10,5"
+                       Click="RefreshTasksButton_Click"
+                       Cursor="Hand"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

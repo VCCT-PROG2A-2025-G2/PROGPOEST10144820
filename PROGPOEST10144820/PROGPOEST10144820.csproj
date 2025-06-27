@@ -56,14 +56,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Features\ActivityLogger.cs" />
-    <Compile Include="Features\NLPProcessor.cs" />
-    <Compile Include="Features\QuizEngen.cs" />
+    <Compile Include="ActivityWindowxaml.xaml.cs">
+      <DependentUpon>ActivityWindowxaml.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Models\ActivityLogger.cs" />
+    <Compile Include="Models\NLPProcessor.cs" />
+    <Compile Include="Models\QuizQuestion.cs" />
+    <Compile Include="Models\TaskItem.cs" />
+    <Compile Include="QuizWindow.xaml.cs">
+      <DependentUpon>QuizWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Services\ConversationService.cs" />
     <Compile Include="Services\ResponseService.cs" />
     <Compile Include="Services\SentimentAnalysisService.cs" />
     <Compile Include="Services\VoiceService.cs" />
-    <Compile Include="Features\TaskEngen.cs" />
+    <Compile Include="TaskWindow.xaml.cs">
+      <DependentUpon>TaskWindow.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ActivityWindowxaml.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -81,6 +94,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="QuizWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TaskWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\ConversationMessage.cs" />

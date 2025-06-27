@@ -9,6 +9,10 @@ namespace PROGPOE
 {
     public class CyberBotEngine : IDisposable
     {
+        private readonly TaskItem taskManager;
+        private readonly QuizManager quizManager;
+        private readonly ActivityLogger activityLogger;
+        private readonly NLPProcessor nlpProcessor;
         private readonly IVoiceService voiceService;
         private readonly ISentimentAnalysisService sentimentService;
         private readonly IResponseService responseService;
@@ -202,6 +206,8 @@ namespace PROGPOE
             {
                 voiceService?.Dispose();
                 disposed = true;
+
+
             }
         }
     }

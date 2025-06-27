@@ -1,0 +1,135 @@
+﻿<Window x:Class="PROGPOE.QuizWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Cybersecurity Quiz Challenge" Height="500" Width="650"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,20">
+            <TextBlock Text="🛡️ Cybersecurity Quiz Challenge" 
+                       FontSize="24" FontWeight="Bold" 
+                       HorizontalAlignment="Center"/>
+            <TextBlock x:Name="CategoryTextBlock" Text="Test Your Security Knowledge" 
+                       FontSize="14" FontStyle="Italic" 
+                       HorizontalAlignment="Center" Margin="0,5,0,0"
+                       Foreground="DarkBlue"/>
+        </StackPanel>
+
+        <!-- Quiz Progress and Score -->
+        <Border Grid.Row="1" Background="LightBlue" CornerRadius="5" 
+                Padding="15,10" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" HorizontalAlignment="Left">
+                    <TextBlock x:Name="QuestionProgressTextBlock" Text="Question 1 of 10" 
+                               FontSize="16" FontWeight="SemiBold"/>
+                    <ProgressBar x:Name="QuizProgressBar" Height="8" Margin="0,5,0,0" 
+                                 Minimum="0" Maximum="10" Value="1"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                    <TextBlock Text="Current Score" FontSize="12" HorizontalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock x:Name="ScoreTextBlock" Text="0" 
+                                   FontSize="20" FontWeight="Bold" Foreground="DarkGreen"/>
+                        <TextBlock Text=" / " FontSize="16" Margin="2,0"/>
+                        <TextBlock x:Name="TotalQuestionsTextBlock" Text="10" 
+                                   FontSize="16"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Question Section -->
+        <GroupBox Grid.Row="2" Header="Current Question" Margin="0,0,0,15"
+                  FontSize="14" FontWeight="SemiBold">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="10">
+                <StackPanel>
+                    <TextBlock x:Name="QuestionTextBlock" 
+                               Text="Click 'Start Quiz' to begin your cybersecurity challenge!" 
+                               FontSize="16" TextWrapping="Wrap" 
+                               Margin="0,0,0,25" MinHeight="60"
+                               LineHeight="24"/>
+
+                    <!-- Answer Options -->
+                    <StackPanel x:Name="AnswerOptionsPanel">
+                        <Button x:Name="AnswerButtonA" Content="A) Option A" 
+                                Height="45" Margin="0,5" FontSize="14"
+                                Click="AnswerButton_Click" Tag="0"
+                                HorizontalContentAlignment="Left" Padding="15,0"/>
+                        <Button x:Name="AnswerButtonB" Content="B) Option B" 
+                                Height="45" Margin="0,5" FontSize="14"
+                                Click="AnswerButton_Click" Tag="1"
+                                HorizontalContentAlignment="Left" Padding="15,0"/>
+                        <Button x:Name="AnswerButtonC" Content="C) Option C" 
+                                Height="45" Margin="0,5" FontSize="14"
+                                Click="AnswerButton_Click" Tag="2"
+                                HorizontalContentAlignment="Left" Padding="15,0"/>
+                        <Button x:Name="AnswerButtonD" Content="D) Option D" 
+                                Height="45" Margin="0,5" FontSize="14"
+                                Click="AnswerButton_Click" Tag="3"
+                                HorizontalContentAlignment="Left" Padding="15,0"/>
+                    </StackPanel>
+
+                    <!-- Explanation Panel (initially hidden) -->
+                    <Border x:Name="ExplanationPanel" Background="LightYellow" 
+                            CornerRadius="5" Padding="15" Margin="0,20,0,0"
+                            Visibility="Collapsed">
+                        <StackPanel>
+                            <TextBlock Text="Explanation:" FontWeight="Bold" FontSize="14"/>
+                            <TextBlock x:Name="ExplanationTextBlock" 
+                                       TextWrapping="Wrap" Margin="0,5,0,0"
+                                       FontSize="13"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </GroupBox>
+
+        <!-- Control Buttons -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" 
+                    HorizontalAlignment="Center" Margin="0,0,0,10">
+            <Button x:Name="StartQuizButton" Content="🚀 Start Quiz" 
+                    Width="120" Height="35" Margin="0,0,10,0"
+                    Click="StartQuizButton_Click" FontWeight="SemiBold"/>
+            <Button x:Name="NextQuestionButton" Content="Next Question ➡️" 
+                    Width="140" Height="35" Margin="0,0,10,0"
+                    Click="NextQuestionButton_Click" IsEnabled="False"/>
+            <Button x:Name="RestartQuizButton" Content="🔄 Restart Quiz" 
+                    Width="120" Height="35" Margin="0,0,10,0"
+                    Click="RestartQuizButton_Click" IsEnabled="False"/>
+            <Button x:Name="ViewResultsButton" Content="📊 Results" 
+                    Width="100" Height="35"
+                    Click="ViewResultsButton_Click" IsEnabled="False"/>
+        </StackPanel>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="4" Height="30">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusTextBlock" 
+                           Text="Ready to test your cybersecurity knowledge? Click 'Start Quiz' to begin!"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="⏱️ Time: " FontWeight="SemiBold"/>
+                    <TextBlock x:Name="TimerTextBlock" Text="00:00" FontWeight="SemiBold"/>
+                </StackPanel>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
