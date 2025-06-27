@@ -1,0 +1,329 @@
+﻿<Window x:Class="PROGPOE.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CyberBot - Advanced Cybersecurity Assistant" 
+        Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen"
+        Background="#FF1E1E2E">
+
+    <Window.Resources>
+        <!-- Modern styling resources -->
+        <Style x:Key="ModernButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#FF6C5CE7"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#FF5A4FCF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#FF4A3FBF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#FF2A2A3A"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#FF6C5CE7"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                        Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ChatBubbleStyle" TargetType="Border">
+            <Setter Property="CornerRadius" Value="15"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Margin" Value="5,2"/>
+            <Setter Property="MaxWidth" Value="600"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#FF2D1B69" Padding="20,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="🤖" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <StackPanel>
+                        <TextBlock Text="CyberBot AI Assistant" 
+                                 FontSize="20" FontWeight="Bold" 
+                                 Foreground="White"/>
+                        <TextBlock x:Name="StatusTextBlock" 
+                                 Text="Advanced Cybersecurity Guidance with Task Management & Quiz" 
+                                 FontSize="12" 
+                                 Foreground="#FFBBBBBB"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="VoiceToggleButton" 
+                            Content="🔊 Voice ON" 
+                            Style="{StaticResource ModernButtonStyle}"
+                            Click="VoiceToggleButton_Click"/>
+                    <Button x:Name="SettingsButton" 
+                            Content="⚙️ Settings" 
+                            Style="{StaticResource ModernButtonStyle}"
+                            Click="SettingsButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Chat Area -->
+        <Border Grid.Row="1" Background="#FF1A1A2E" Margin="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Chat Messages -->
+                <ScrollViewer x:Name="ChatScrollViewer" 
+                            Grid.Column="0"
+                            VerticalScrollBarVisibility="Auto"
+                            HorizontalScrollBarVisibility="Disabled"
+                            Background="Transparent"
+                            Margin="10">
+                    <StackPanel x:Name="ChatMessagesPanel" Margin="10">
+                        <!-- Welcome message -->
+                        <Border Style="{StaticResource ChatBubbleStyle}"
+                                Background="#FF0F3460"
+                                HorizontalAlignment="Left">
+                            <TextBlock Text="🤖 Welcome! I'm your AI Cybersecurity Assistant with Task Management, Quiz Games, and Activity Logging. Let's get started by setting up your profile!"
+                                     Foreground="White"
+                                     TextWrapping="Wrap"
+                                     FontSize="14"/>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Sidebar - User Info & Stats -->
+                <Border Grid.Column="1" 
+                        Background="#FF16213E" 
+                        Margin="5"
+                        CornerRadius="10">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="15">
+                            <!-- User Profile Section -->
+                            <TextBlock Text="👤 User Profile" 
+                                     FontSize="16" FontWeight="Bold" 
+                                     Foreground="White" Margin="0,0,0,10"/>
+
+                            <TextBlock x:Name="UserNameTextBlock" 
+                                     Text="Name: Not set" 
+                                     Foreground="#FFBBBBBB" Margin="0,2"/>
+
+                            <TextBlock x:Name="LastInteractionTextBlock" 
+                                     Text="Last active: Now" 
+                                     Foreground="#FFBBBBBB" Margin="0,2"/>
+
+                            <TextBlock x:Name="CurrentMoodTextBlock" 
+                                     Text="Mood: Neutral" 
+                                     Foreground="#FFBBBBBB" Margin="0,2"/>
+
+                            <Separator Margin="0,15" Background="Transparent"/>
+
+                            <!-- Quick Stats -->
+                            <TextBlock Text="📊 Quick Stats" 
+                                     FontSize="16" FontWeight="Bold" 
+                                     Foreground="White" Margin="0,0,0,10"/>
+
+                            <TextBlock x:Name="QuestionsAskedTextBlock" 
+                                     Text="Questions: 0" 
+                                     Foreground="#FFBBBBBB" Margin="0,2"/>
+
+                            <TextBlock x:Name="TopicsExploredTextBlock" 
+                                     Text="Topics: 0/8" 
+                                     Foreground="#FFBBBBBB" Margin="0,2"/>
+
+                            <TextBlock x:Name="ProgressTextBlock" 
+                                     Text="Progress: 0%" 
+                                     Foreground="#FFBBBBBB" Margin="0,2"/>
+
+                            <Separator Margin="0,15" Background="Transparent"/>
+
+                            <!-- Quick Actions -->
+                            <TextBlock Text="⚡ Quick Actions" 
+                                     FontSize="16" FontWeight="Bold" 
+                                     Foreground="White" Margin="0,0,0,10"/>
+
+                            <Button x:Name="HelpButton" 
+                                    Content="❓ Help" 
+                                    Style="{StaticResource ModernButtonStyle}"
+                                    Click="QuickActionButton_Click"
+                                    HorizontalAlignment="Stretch"/>
+
+                            <Button x:Name="TipsButton" 
+                                    Content="💡 Random Tip" 
+                                    Style="{StaticResource ModernButtonStyle}"
+                                    Click="QuickActionButton_Click"
+                                    HorizontalAlignment="Stretch"/>
+
+                            <Button x:Name="StatsButton" 
+                                    Content="📈 Full Stats" 
+                                    Style="{StaticResource ModernButtonStyle}"
+                                    Click="QuickActionButton_Click"
+                                    HorizontalAlignment="Stretch"/>
+
+                            <Button x:Name="MemoryButton" 
+                                    Content="🧠 Memory" 
+                                    Style="{StaticResource ModernButtonStyle}"
+                                    Click="QuickActionButton_Click"
+                                    HorizontalAlignment="Stretch"/>
+
+                            <Separator Margin="0,15" Background="Transparent"/>
+
+                            <!-- Part 3 Features -->
+                            <TextBlock Text="🚀 Part 3 Features" 
+                                     FontSize="16" FontWeight="Bold" 
+                                     Foreground="White" Margin="0,0,0,10"/>
+
+                            <Button x:Name="QuizButton" 
+                                    Content="🎯 Start Quiz" 
+                                    Style="{StaticResource ModernButtonStyle}"
+                                    Click="QuickActionButton_Click"
+                                    HorizontalAlignment="Stretch"/>
+
+                            <Button x:Name="TasksButton" 
+                                    Content="📝 View Tasks" 
+                                    Style="{StaticResource ModernButtonStyle}"
+                                    Click="QuickActionButton_Click"
+                                    HorizontalAlignment="Stretch"/>
+
+                            <Button x:Name="ActivityButton" 
+                                    Content="📊 Activity Log" 
+                                    Style="{StaticResource ModernButtonStyle}"
+                                    Click="QuickActionButton_Click"
+                                    HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Setup Panel (initially visible) -->
+        <Border x:Name="SetupPanel" 
+                Grid.Row="2" 
+                Background="#FF2A2A3A" 
+                Padding="20"
+                Margin="10,0">
+            <StackPanel>
+                <TextBlock Text="🚀 Initial Setup" 
+                         FontSize="18" FontWeight="Bold" 
+                         Foreground="White" Margin="0,0,0,10"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0" Text="Name:" 
+                             VerticalAlignment="Center" 
+                             Foreground="White" Margin="0,0,10,0"/>
+
+                    <TextBox x:Name="UserNameTextBox" 
+                           Grid.Column="1"
+                           Style="{StaticResource ModernTextBoxStyle}"
+                           Margin="0,0,20,0"/>
+
+                    <TextBlock Grid.Column="2" Text="Interests:" 
+                             VerticalAlignment="Center" 
+                             Foreground="White" Margin="0,0,10,0"/>
+
+                    <TextBox x:Name="UserInterestsTextBox" 
+                           Grid.Column="3"
+                           Style="{StaticResource ModernTextBoxStyle}"
+                           Margin="0,0,20,0"
+                           Text="passwords, phishing, privacy, tasks, quizzes"/>
+
+                    <Button x:Name="SetupCompleteButton" 
+                            Grid.Column="4"
+                            Content="🎯 Start Chat" 
+                            Style="{StaticResource ModernButtonStyle}"
+                            Click="SetupCompleteButton_Click"/>
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <!-- Chat Input Area -->
+        <Border x:Name="ChatInputPanel" 
+                Grid.Row="3" 
+                Background="#FF2A2A3A" 
+                Padding="20"
+                Margin="10,0"
+                Visibility="Collapsed">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="ChatInputTextBox" 
+                         Grid.Column="0"
+                         Style="{StaticResource ModernTextBoxStyle}"
+                         Margin="0,0,10,0"
+                         FontSize="16"
+                         KeyDown="ChatInputTextBox_KeyDown"
+                         Text="Try: 'add task', 'start quiz', 'activity log', or 'help'"/>
+
+                <Button x:Name="SendButton" 
+                        Grid.Column="1"
+                        Content="📤 Send" 
+                        Style="{StaticResource ModernButtonStyle}"
+                        Click="SendButton_Click"
+                        IsDefault="True"/>
+
+                <Button x:Name="ClearButton" 
+                        Grid.Column="2"
+                        Content="🗑️ Clear" 
+                        Style="{StaticResource ModernButtonStyle}"
+                        Click="ClearButton_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
