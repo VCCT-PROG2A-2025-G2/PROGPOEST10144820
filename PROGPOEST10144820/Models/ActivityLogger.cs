@@ -105,5 +105,8 @@ namespace PROGPOE.Models
                 return $"{Action} - {Details}";
             }
         }
+
+        public object Description { get; internal set; }
+        public bool ShowDate { get; internal set; }
     }
 }

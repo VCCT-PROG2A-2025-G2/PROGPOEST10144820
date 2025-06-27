@@ -417,18 +417,41 @@ namespace PROGPOE
         {
             try
             {
+                Console.WriteLine("Starting NavigateToActivity...");
+
                 if (activityWindow == null || !activityWindow.IsLoaded)
                 {
+                    Console.WriteLine("Creating new ActivityWindow...");
+
+                    if (activityLogger == null)
+                    {
+                        throw new InvalidOperationException("ActivityLogger is null");
+                    }
+
                     activityWindow = new ActivityWindow(activityLogger);
                     activityWindow.Owner = this;
+
+                    // Add closed event handler to clean up reference
+                    activityWindow.Closed += (s, e) => {
+                        Console.WriteLine("ActivityWindow closed, cleaning up reference");
+                        activityWindow = null;
+                    };
                 }
+
+                Console.WriteLine("Showing ActivityWindow...");
                 activityWindow.Show();
-                activityWindow.Focus();
+                activityWindow.Activate();
+
+                Console.WriteLine("NavigateToActivity completed successfully");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error opening Activity window: {ex.Message}", "Navigation Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                Console.WriteLine($"NavigateToActivity failed: {ex}");
+                MessageBox.Show($"Error opening Activity window: {ex.Message}\n\nDetails: {ex.InnerException?.Message}",
+                               "Navigation Error", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                // Clean up failed window reference
+                activityWindow = null;
             }
         }
 
